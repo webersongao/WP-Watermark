@@ -230,7 +230,7 @@ function wpwatermark_setting_page() {
 													<input class="layui-input" name="watermark_margin" type="text"  value="<?php echo esc_attr($wpwatermark_options['watermark_margin']); ?>" size="20" />
 												</div>
 												<div class="layui-form-mid layui-word-aux">
-													（平铺时水印之间距离）
+													（仅在满铺水印时，该间距有效）
 												</div>
 											</div>
 											<div class="layui-form-item">
@@ -248,7 +248,7 @@ function wpwatermark_setting_page() {
 													<input class="layui-input" name="watermark_spacing" type="text" id="label3" value="<?php echo esc_attr($wpwatermark_options['watermark_spacing']); ?>" size="20" />
 												</div>
 												<div class="layui-form-mid layui-word-aux">
-													（水印起始位置距离图片四周边距数值，单位为px 建议30px）
+													（水印起始位置距离四周边距数值,建议15px，仅在九宫格模式时有效）
 												</div>
 											</div></td>
 									</tr>

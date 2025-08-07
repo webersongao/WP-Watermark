@@ -1,110 +1,118 @@
 <?php
+$cache = []; // 初始化缓存变量
+
 function wpWaterMarkPosition($point, $imgWidth, $imgHeight, $textWidth, $textLength, $lineHeight, $margin) {
-	$pointLeft = $margin;
-	$pointTop = $margin;
-	switch ($point) {
-		case 1:
-			$pointLeft = $margin;
-			$pointTop = $margin;
-			break;
-		case 2:
-			$pointLeft = floor(($imgWidth - $textWidth) / 2);
-			$pointTop = $margin;
-			break;
-		case 3:
-			$pointLeft = $imgWidth - $textWidth - $margin;
-			$pointTop = $margin;
-			break;
-		case 4:
-			$pointLeft = $margin;
-			$pointTop = floor(($imgHeight - $textLength * $lineHeight) / 2);
-			break;
-		case 5:
-			$pointLeft = floor(($imgWidth - $textWidth) / 2);
-			$pointTop = floor(($imgHeight - $textLength * $lineHeight) / 2);
-			break;
-		case 6:
-			$pointLeft = $imgWidth - $textWidth - $margin;
-			$pointTop = floor(($imgHeight - $textLength * $lineHeight) / 2);
-			break;
-		case 7:
-			$pointLeft = $margin;
-			$pointTop = $imgHeight - $textLength * $lineHeight - $margin;
-			break;
-		case 8:
-			$pointLeft = floor(($imgWidth - $textWidth) / 2);
-			$pointTop = $imgHeight - $textLength * $lineHeight - $margin;
-			break;
-		case 9:
-			$pointLeft = $imgWidth - $textWidth - $margin;
-			$pointTop = $imgHeight - $textLength * $lineHeight - $margin;
-			break;
-	}
-	return array('pointLeft' => $pointLeft, 'pointTop' => $pointTop);
+    $pointLeft = $margin;
+    $pointTop = $margin;
+    if ($point == 0) {
+        $point = mt_rand(1, 9);
+    }
+    switch ($point) {
+        case 1:
+            $pointLeft = $margin;
+            $pointTop = $margin + $lineHeight;
+            break;
+        case 2:
+            $pointLeft = floor(($imgWidth - $textWidth) / 2);
+            $pointTop = $margin + $lineHeight;
+            break;
+        case 3:
+            $pointLeft = $imgWidth - $textWidth - $margin;
+            $pointTop = $margin + $lineHeight;
+            break;
+        case 4:
+            $pointLeft = $margin;
+            $pointTop = floor(($imgHeight - $textLength * $lineHeight) / 2);
+            break;
+        case 5:
+            $pointLeft = floor(($imgWidth - $textWidth) / 2);
+            $pointTop = floor(($imgHeight - $textLength * $lineHeight) / 2);
+            break;
+        case 6:
+            $pointLeft = $imgWidth - $textWidth - $margin;
+            $pointTop = floor(($imgHeight - $textLength * $lineHeight) / 2);
+            break;
+        case 7:
+            $pointLeft = $margin;
+            $pointTop = $imgHeight - $margin;
+            break;
+        case 8:
+            $pointLeft = floor(($imgWidth - $textWidth) / 2);
+            $pointTop = $imgHeight - $margin;
+            break;
+        case 9:
+            $pointLeft = $imgWidth - $textWidth - $margin;
+            $pointTop = $imgHeight - $margin;
+            break;
+    }
+    return array('pointLeft' => $pointLeft, 'pointTop' => $pointTop);
 }
-function wpWaterMarkSetAngle ( $angle, $point, $position, $textWidth, $imgHeight ) {
-	if ($angle < 90) {
-		$diffTop = ceil(sin(deg2rad($angle)) * $textWidth);
 
-		if (in_array($point, array(1, 2, 3))) {
-			$position['pointTop'] += $diffTop;
-		} elseif (in_array($point, array(4, 5, 6))) {
-			if ($textWidth > ceil($imgHeight / 2)) {
-				$position['pointTop'] += ceil(($textWidth - $imgHeight / 2) / 2);
-			}
-		}
-	} elseif ($angle > 270) {
-		$diffTop = ceil(sin(deg2rad(360 - $angle)) * $textWidth);
+function wpWaterMarkSetAngle($angle, $point, $position, $textWidth, $imgHeight) {
+    if ($angle < 90) {
+        $diffTop = ceil(sin(deg2rad($angle)) * $textWidth);
 
-		if (in_array($point, array(7, 8, 9))) {
-			$position['pointTop'] -= $diffTop;
-		} elseif (in_array($point, array(4, 5, 6))) {
-			if ($textWidth > ceil($imgHeight / 2)) {
-				$position['pointTop'] = ceil(($imgHeight - $diffTop) / 2);
-			}
-		}
-	}
-	return $position;
+        if (in_array($point, array(1, 2, 3))) {
+            $position['pointTop'] += $diffTop;
+        } elseif (in_array($point, array(4, 5, 6))) {
+            if ($textWidth > ceil($imgHeight / 2)) {
+                $position['pointTop'] += ceil(($textWidth - $imgHeight / 2) / 2);
+            }
+        }
+    } elseif ($angle > 270) {
+        $diffTop = ceil(sin(deg2rad(360 - $angle)) * $textWidth);
+
+        if (in_array($point, array(7, 8, 9))) {
+            $position['pointTop'] -= $diffTop;
+        } elseif (in_array($point, array(4, 5, 6))) {
+            if ($textWidth > ceil($imgHeight / 2)) {
+                $position['pointTop'] = ceil(($imgHeight - $diffTop) / 2);
+            }
+        }
+    }
+    return $position;
 }
+
 function wpwatermark_hex2rgb($hexColor) {
-	$color = str_replace('#', '', $hexColor);
-	if (strlen($color) > 3) {
-		$rgb = array(
-			'r' => hexdec(substr($color, 0, 2)),
-			'g' => hexdec(substr($color, 2, 2)),
-			'b' => hexdec(substr($color, 4, 2))
-		);
-	} else {
-		$color = $hexColor;
-		$r = substr($color, 0, 1) . substr($color, 0, 1);
-		$g = substr($color, 1, 1) . substr($color, 1, 1);
-		$b = substr($color, 2, 1) . substr($color, 2, 1);
-		$rgb = array(
-			'r' => hexdec($r),
-			'g' => hexdec($g),
-			'b' => hexdec($b)
-		);
-	}
-	return $rgb['r'].','.$rgb['g'].','.$rgb['b'];
+    $color = str_replace('#', '', $hexColor);
+    if (strlen($color) > 3) {
+        $rgb = array(
+            'r' => hexdec(substr($color, 0, 2)),
+            'g' => hexdec(substr($color, 2, 2)),
+            'b' => hexdec(substr($color, 4, 2))
+        );
+    } else {
+        $color = $hexColor;
+        $r = substr($color, 0, 1) . substr($color, 0, 1);
+        $g = substr($color, 1, 1) . substr($color, 1, 1);
+        $b = substr($color, 2, 1) . substr($color, 2, 1);
+        $rgb = array(
+            'r' => hexdec($r),
+            'g' => hexdec($g),
+            'b' => hexdec($b)
+        );
+    }
+    return $rgb['r'].','.$rgb['g'].','.$rgb['b'];
 }
-function wpWaterMarkCreateWordsWatermark($imgurl, $newimgurl, $text, $margin = 30, $fontSize = 14, $color = '#790000', $point = 1, $font = 'simhei.ttf', $angle = 0, $watermark_margin = 80, $output_webp = false )
-{
+
+function wpWaterMarkCreateWordsWatermark($imgurl, $newimgurl, $text, $margin = 30, $fontSize = 14, $color = '#790000', $point = 1, $font = 'simhei.ttf', $angle = 0, $watermark_margin = 80, $output_webp = false) {
+    global $cache; // 使用全局缓存变量
+
     $margin = intval($margin);
     $angle = intval($angle);
     $watermark_margin = intval($watermark_margin);
-    
+
     $imageCreateFunArr = array(
-        'image/jpeg' => 'imagecreatefromjpeg', 
-        'image/png'  => 'imagecreatefrompng', 
+        'image/jpeg' => 'imagecreatefromjpeg',
+        'image/png'  => 'imagecreatefrompng',
         'image/gif'  => 'imagecreatefromgif'
     );
     $imageOutputFunArr = array(
-        'image/jpeg' => 'imagejpeg', 
-        'image/png'  => 'imagepng', 
+        'image/jpeg' => 'imagejpeg',
+        'image/png'  => 'imagepng',
         'image/gif'  => 'imagegif'
     );
 
-    // 获取图像大小
     $imgsize = getimagesize($imgurl);
     if (empty($imgsize)) {
         return false;
@@ -121,39 +129,33 @@ function wpWaterMarkCreateWordsWatermark($imgurl, $newimgurl, $text, $margin = 3
     $imageCreateFun = $imageCreateFunArr[$imgMime];
     $imageOutputFun = $imageOutputFunArr[$imgMime];
 
-    // 创建图像资源
     $im = $imageCreateFun($imgurl);
 
-    // 优化：缓存字体尺寸的计算
     $color = explode(',', wpwatermark_hex2rgb($color));
     $text_color = imagecolorallocate($im, intval($color[0]), intval($color[1]), intval($color[2]));
 
     $point = ($point >= 0 && $point <= 10) ? intval($point) : 1;
-    $fontSize = max(1, intval($fontSize));  // 确保字体大小有效
+    $fontSize = max(1, intval($fontSize));
     $angle = ($angle >= 0 && $angle < 90 || $angle > 270 && $angle < 360) ? $angle : 0;
     $fontUrl = plugin_dir_path(__FILE__) . 'fonts/' . ($font ? $font : 'alibaba.otf');
-    
+
     $textArray = explode('|', $text);
     $textCount = count($textArray);
 
-    // 计算最大文本长度（缓存结果）
-    $maxTextLength = max(array_map('strlen', $textArray));
-    $textSize = imagettfbbox($fontSize, 0, $fontUrl, str_repeat('M', $maxTextLength));  // 用‘M’模拟最长宽度
-    $textWidth = abs($textSize[4] - $textSize[0]);
-    $textHeight = abs($textSize[5] - $textSize[1]);
-    $lineHeight = $textHeight + 3;
+    $dimensions = getTextDimensions($textArray, $fontSize, $fontUrl, $angle, $cache);
+    $textWidth = $dimensions['maxWidth'];
+    $lineHeight = $dimensions['lineHeight'];
+    $totalHeight = $dimensions['totalHeight'];
 
-    // 优化：避免无效水印操作
-    if ($textWidth + 40 > $imgWidth || $lineHeight * $textCount + 40 > $imgHeight) {
+    if ($textWidth + 40 > $imgWidth || $totalHeight + 40 > $imgHeight) {
         imagedestroy($im);
         return false;
     }
 
     if ($point == 10) {
-        // 平铺水印优化
         $x_limit = $imgWidth - $margin;
         $y_limit = $imgHeight - $margin;
-        
+
         for ($x = $margin; $x < $x_limit; $x += ($textWidth + $watermark_margin)) {
             for ($y = $margin; $y < $y_limit; $y += ($lineHeight * $textCount + $watermark_margin)) {
                 foreach ($textArray as $key => $line) {
@@ -183,106 +185,94 @@ function wpWaterMarkCreateWordsWatermark($imgurl, $newimgurl, $text, $margin = 3
         }
     }
 
-    // 保存其他格式
     $imageOutputFun($im, $newimgurl);
     imagedestroy($im);
     return $newimgurl;
 }
 
-function wpWaterMarkImageWatermarkPosition( $point, $imgWidth, $imgHeight, $stampWidth, $stampHeight, $margin )
-{
-	$pointLeft = $margin;
-	$pointTop = $margin;
-	if ( $point == 0 ) {
-		$point = mt_rand(1, 9);
-	}
-	switch ( $point ) {
-		case 1:
-			$pointLeft = $margin;
-			$pointTop = $margin;
-			break;
-		case 2:
-			$pointLeft = floor(($imgWidth - $stampWidth) / 2);
-			$pointTop = $margin;
-			break;
-		case 3:
-			$pointLeft = $imgWidth - $stampWidth - $margin;
-			$pointTop = $margin;
-			break;
-		case 4:
-			$pointLeft = $margin;
-			$pointTop = floor(($imgHeight - $stampHeight) / 2);
-			break;
-		case 5:
-			$pointLeft = floor(($imgWidth - $stampWidth) / 2);
-			$pointTop = floor(($imgHeight - $stampHeight) / 2);
-			break;
-		case 6:
-			$pointLeft = $imgWidth - $stampWidth - $margin;
-			$pointTop = floor(($imgHeight - $stampHeight) / 2);
-			break;
-		case 7:
-			$pointLeft = $margin;
-			$pointTop = $imgHeight - $stampHeight - $margin;
-			break;
-		case 8:
-			$pointLeft = floor(($imgWidth - $stampWidth) / 2);
-			$pointTop = $imgHeight - $stampHeight - $margin;
-			break;
-		case 9:
-			$pointLeft = $imgWidth - $stampWidth - $margin;
-			$pointTop = $imgHeight - $stampHeight - $margin;
-			break;
-	}
-	return array('pointLeft' => $pointLeft, 'pointTop' => $pointTop);
+function wpWaterMarkImageWatermarkPosition($point, $imgWidth, $imgHeight, $stampWidth, $stampHeight, $margin) {
+    $pointLeft = $margin;
+    $pointTop = $margin;
+    if ($point == 0) {
+        $point = mt_rand(1, 9);
+    }
+    switch ($point) {
+        case 1:
+            $pointLeft = $margin;
+            $pointTop = $margin;
+            break;
+        case 2:
+            $pointLeft = floor(($imgWidth - $stampWidth) / 2);
+            $pointTop = $margin;
+            break;
+        case 3:
+            $pointLeft = $imgWidth - $stampWidth - $margin;
+            $pointTop = $margin;
+            break;
+        case 4:
+            $pointLeft = $margin;
+            $pointTop = floor(($imgHeight - $stampHeight) / 2);
+            break;
+        case 5:
+            $pointLeft = floor(($imgWidth - $stampWidth) / 2);
+            $pointTop = floor(($imgHeight - $stampHeight) / 2);
+            break;
+        case 6:
+            $pointLeft = $imgWidth - $stampWidth - $margin;
+            $pointTop = floor(($imgHeight - $stampHeight) / 2);
+            break;
+        case 7:
+            $pointLeft = $margin;
+            $pointTop = $imgHeight - $stampHeight - $margin;
+            break;
+        case 8:
+            $pointLeft = floor(($imgWidth - $stampWidth) / 2);
+            $pointTop = $imgHeight - $stampHeight - $margin;
+            break;
+        case 9:
+            $pointLeft = $imgWidth - $stampWidth - $margin;
+            $pointTop = $imgHeight - $stampHeight - $margin;
+            break;
+    }
+    return array('pointLeft' => $pointLeft, 'pointTop' => $pointTop);
 }
 
-function wpWaterMarkCreateImageWatermark($img_url, $stamp_url, $newimgurl, $point, $pct = '100', $margin = '30', $watermark_margin = '80', $output_webp = false)
-{
-    // 将参数转为整型
+function wpWaterMarkCreateImageWatermark($img_url, $stamp_url, $newimgurl, $point, $pct = '100', $margin = '30', $watermark_margin = '80', $output_webp = false) {
     $pct = intval($pct);
     $margin = intval($margin);
     $watermark_margin = intval($watermark_margin);
 
-    // 图像加载和输出函数映射
     $imageFunMap = [
         'image/jpeg' => ['create' => 'imagecreatefromjpeg', 'output' => 'imagejpeg'],
         'image/png'  => ['create' => 'imagecreatefrompng', 'output' => 'imagepng']
     ];
 
-    // 获取主图和水印图信息
     $im_size = getimagesize($img_url);
     $stamp_size = getimagesize($stamp_url);
     if (empty($im_size) || empty($stamp_size)) {
         return false;
     }
 
-    // 获取图像尺寸及类型
     list($imWidth, $imHeight, $imType) = $im_size;
     list($stampWidth, $stampHeight, $stampType) = $stamp_size;
 
-    // 如果水印大于图片，返回 false
     if ($imWidth < $stampWidth || $imHeight < $stampHeight) {
         return false;
     }
 
-    // 检查是否支持图像格式
     if (!isset($imageFunMap[$im_size['mime']]) || !isset($imageFunMap[$stamp_size['mime']])) {
         return false;
     }
 
-    // 加载主图和水印图
     $imCreateFun = $imageFunMap[$im_size['mime']]['create'];
     $stampCreateFun = $imageFunMap[$stamp_size['mime']]['create'];
     $im = $imCreateFun($img_url);
     $stamp = $stampCreateFun($stamp_url);
 
-    // 根据位置计算水印位置
     $position = ($point == 10)
         ? wpWaterMarkTileWatermark($im, $stamp, $imWidth, $imHeight, $stampWidth, $stampHeight, $margin, $watermark_margin, $pct)
         : wpWaterMarkSinglePosition($im, $stamp, $point, $imWidth, $imHeight, $stampWidth, $stampHeight, $margin, $pct);
 
-    // 输出图像并保存
     $imageOutputFun = $imageFunMap[$im_size['mime']]['output'];
     $imageOutputFun($im, $newimgurl, 100);
 
@@ -297,14 +287,12 @@ function wpWaterMarkCreateImageWatermark($img_url, $stamp_url, $newimgurl, $poin
         }
     }
 
-    // 清理内存
     imagedestroy($im);
     imagedestroy($stamp);
     return $newimgurl;
 }
 
-function wpWaterMarkTileWatermark($im, $stamp, $imWidth, $imHeight, $stampWidth, $stampHeight, $margin, $watermark_margin, $pct)
-{
+function wpWaterMarkTileWatermark($im, $stamp, $imWidth, $imHeight, $stampWidth, $stampHeight, $margin, $watermark_margin, $pct) {
     $x_length = $imWidth - $margin;
     $y_length = $imHeight - $margin;
     for ($x = $margin; $x < $x_length; $x += ($stampWidth + $watermark_margin)) {
@@ -314,14 +302,12 @@ function wpWaterMarkTileWatermark($im, $stamp, $imWidth, $imHeight, $stampWidth,
     }
 }
 
-function wpWaterMarkSinglePosition($im, $stamp, $point, $imWidth, $imHeight, $stampWidth, $stampHeight, $margin, $pct)
-{
+function wpWaterMarkSinglePosition($im, $stamp, $point, $imWidth, $imHeight, $stampWidth, $stampHeight, $margin, $pct) {
     $position = wpWaterMarkImageWatermarkPosition($point, $imWidth, $imHeight, $stampWidth, $stampHeight, $margin);
     imagecopymerge($im, $stamp, $position['pointLeft'], $position['pointTop'], 0, 0, $stampWidth, $stampHeight, $pct);
 }
 
 function generate_new_image_url($file_path) {
-
     $file_parts = pathinfo($file_path);
     $file_prefix = preg_match('/^\d+-/', $file_parts['filename'], $matches) ? $matches[0] : '';
     $encrypted_string = base_convert(substr(md5($file_parts['filename']), 0, 8), 16, 36);
@@ -329,4 +315,36 @@ function generate_new_image_url($file_path) {
     $new_file_name = $file_prefix . $encrypted_string . '.' . $file_parts['extension'];
 
     return $file_parts['dirname'] . '/' . $new_file_name;
+}
+
+function getTextDimensions($textArray, $fontSize, $fontUrl, $angle = 0, &$cache = []) {
+    $cacheKey = md5(json_encode([$textArray, $fontSize, $fontUrl, $angle]));
+
+    if (isset($cache[$cacheKey])) {
+        return $cache[$cacheKey];
+    }
+
+    $dimensions = [
+        'maxWidth' => 0,
+        'totalHeight' => 0,
+        'lineHeight' => 0,
+        'textCount' => count($textArray),
+    ];
+
+    $lineHeight = 0;
+    foreach ($textArray as $text) {
+        $textSize = imagettfbbox($fontSize, $angle, $fontUrl, $text);
+        $width = abs($textSize[4] - $textSize[0]);
+        $height = abs($textSize[5] - $textSize[1]);
+
+        $dimensions['maxWidth'] = max($dimensions['maxWidth'], $width);
+        $lineHeight = max($lineHeight, $height);
+    }
+
+    $dimensions['lineHeight'] = $lineHeight + 3;
+    $dimensions['totalHeight'] = $dimensions['lineHeight'] * $dimensions['textCount'];
+
+    $cache[$cacheKey] = $dimensions;
+
+    return $dimensions;
 }
